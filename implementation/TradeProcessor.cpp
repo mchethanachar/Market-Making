@@ -44,9 +44,21 @@ int openQty = 0;
 bool pendingCan = false;
 string canOrder = "";
 
+//Market making performance
 float avlCash = 100000;
 int avlQty = 0;
 
+//For moving average calculation
+int maSize = 20;
+vector<float> midpriceMa(maSize,0);
+float movingAverage = 0;
+float movingAverageDistance = 0;
+
+//For moving average slope calculation
+int maSlopeSize = 10;
+vector<float> movingAverages(maSlopeSize, 0);
+vector<float> movingAverageDistances(maSlopeSize, 0);
+int maCounter = 0;
 
 void processOrder(OrderItem orderItem)
 {	
