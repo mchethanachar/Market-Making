@@ -53,7 +53,7 @@ void readTradeFile()
 				priceFile<<totalMin<<","<<midPrice<<"\n";
 				//printBook(bidBook, askBook, bestBid, bestAsk, totalBids, totalAsks);
 				//cout<<orderItem.versionTime<<"       Price - "<<midPrice<<"    Volume - "<<volume<<"\n";
-				updateMA(totalMin, maSize, midpriceMa, midPrice,movingAverage, movingAverageDistance);
+				updateMA(maWeight, maSize, midpriceMa, midPrice,movingAverage, movingAverageDistance);
 				//cout<<"Moving average - "<<movingAverage<<"\n";
 				if(totalMin >= 15+maSize-1)
 				{

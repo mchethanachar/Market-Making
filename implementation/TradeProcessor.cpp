@@ -59,6 +59,7 @@ int maSlopeSize = 10;
 vector<float> movingAverages(maSlopeSize, 0);
 vector<float> movingAverageDistances(maSlopeSize, 0);
 int maCounter = 0;
+float maWeight = 1.99;
 
 void processOrder(OrderItem orderItem)
 {	

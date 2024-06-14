@@ -185,20 +185,6 @@ float getDeltaT(int hour, int min)
 	return (float)(390 - totalMin)/390;
 }
 
-void updateMA(int min, int maSize, vector<float> &midpriceMa, float midPrice, float &movingAverage, float &movingAverageDistance)
-{
-	/*cout<<"Calculating MA for min - "<<min<<"\n";
-	for(int i=0; i<maSize; i++)
-	{
-		cout<<midpriceMa[i]<<" ";
-	}*/
-	cout<<"\n";
-	movingAverage -= midpriceMa[(min-15)%maSize];
-	movingAverage += midPrice/maSize;
-	midpriceMa[(min-15)%maSize] = midPrice/maSize;
-	movingAverageDistance = midPrice-movingAverage;
-}
-
 float getUpperBound(float predictedMa, float sd)
 {
 	float upperBound = predictedMa + (sd/0.6); // using SD of Sin wave here
@@ -270,6 +256,28 @@ void leftShift(vector<float> &movingAverages)
 	{
 		movingAverages[i-1] = movingAverages[i];
 	}
+}
+
+void updateMA(float weight, int maSize, vector<float> &midpriceMa, float midPrice, float &movingAverage, float &movingAverageDistance)
+{
+	float initialWeight, increment, sum;
+	initialWeight = 1-(weight-1);
+	increment = (weight-initialWeight)/(maSize-1);
+	sum = 0;
+	leftShift(midpriceMa);
+	midpriceMa[maSize-1] = midPrice;
+
+	for(int i=0; i<maSize; i++)
+	{
+		sum += (midpriceMa[i]*(initialWeight + (increment*i)));
+	}
+	movingAverage = sum/maSize;
+	movingAverageDistance = midPrice-movingAverage;
+	/*cout<<"\n";
+	movingAverage -= midpriceMa[(min-15)%maSize];
+	movingAverage += midPrice/maSize;
+	midpriceMa[(min-15)%maSize] = midPrice/maSize;
+	movingAverageDistance = midPrice-movingAverage;*/
 }
 
 float getAverage(vector<float> vectNum)
