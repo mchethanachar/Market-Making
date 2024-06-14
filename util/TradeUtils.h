@@ -1,6 +1,7 @@
 #include<iostream>
 #include "../models/LevelItem.cpp"
 #include "Utils.h"
+#include<D:/HFT/softwares/eigen-master/Eigen/Dense>
 
 using namespace std;
 
@@ -170,6 +171,140 @@ float getAskPrice(float bestAsk, int level)
 {
 	float  askPrice = bestAsk + (level*0.05);
 	return askPrice;
+}
+
+int getTotalMin(int hour, int min)
+{
+	int totalMin = (hour*60) + min;
+	return totalMin-540;
+}
+
+float getDeltaT(int hour, int min)
+{
+	int totalMin = getTotalMin(hour, min);
+	return (float)(390 - totalMin)/390;
+}
+
+float getUpperBound(float predictedMa, float sd)
+{
+	float upperBound = predictedMa + (sd/0.6); // using SD of Sin wave here
+	return upperBound;
+}
+
+float getLLowerBound(float predictedMa, float sd)
+{
+	float lowerBound = predictedMa - (sd/0.6); // using SD of Sin wave here
+	return lowerBound;
+}
+
+//Doing linear rehgrassion here and plotting the next
+float getNextMa(vector<float> &movingAverages, int maSlopeSize)
+{
+	vector<float> timeVector(maSlopeSize,0);
+
+	for(int i=0 ; i<maSlopeSize ; i++)
+	timeVector[i] = i;
+
+	// Calculate the necessary summations
+    float sumX = 0.0, sumY = 0.0, sumXY = 0.0, sumX2 = 0.0;
+    for (int i = 0; i < maSlopeSize; ++i) {
+        sumX += timeVector[i];
+        sumY += movingAverages[i];
+        sumXY += timeVector[i] * movingAverages[i];
+        sumX2 += timeVector[i] * timeVector[i];
+    }
+
+	// Calculate the slope (m)
+    float numerator = maSlopeSize * sumXY - sumX * sumY;
+    float denominator = maSlopeSize * sumX2 - sumX * sumX;
+
+	float slope = numerator / denominator;
+	float intercept = (sumY/maSlopeSize) - (slope * sumX/maSlopeSize);
+
+	float nextValue = intercept  + (slope * maSlopeSize);
+
+	return nextValue;
+}
+
+float getSlope(vector<float> &movingAverages, int maSlopeSize)
+{
+	vector<float> timeVector(maSlopeSize,0);
+
+	for(int i=0 ; i<maSlopeSize ; i++)
+	timeVector[i] = i;
+
+	// Calculate the necessary summations
+    float sumX = 0.0, sumY = 0.0, sumXY = 0.0, sumX2 = 0.0;
+    for (int i = 0; i < maSlopeSize; ++i) {
+        sumX += timeVector[i];
+        sumY += movingAverages[i];
+        sumXY += timeVector[i] * movingAverages[i];
+        sumX2 += timeVector[i] * timeVector[i];
+    }
+
+	// Calculate the slope (m)
+    float numerator = maSlopeSize * sumXY - sumX * sumY;
+    float denominator = maSlopeSize * sumX2 - sumX * sumX;
+
+	float slope = numerator / denominator;
+    return slope;
+}
+
+void leftShift(vector<float> &movingAverages)
+{
+	for(int i=1 ; i<movingAverages.size() ; i++)
+	{
+		movingAverages[i-1] = movingAverages[i];
+	}
+}
+
+void updateMA(float weight, int maSize, vector<float> &midpriceMa, float midPrice, float &movingAverage, float &movingAverageDistance)
+{
+	float initialWeight, increment, sum;
+	initialWeight = 1-(weight-1);
+	increment = (weight-initialWeight)/(maSize-1);
+	sum = 0;
+	leftShift(midpriceMa);
+	midpriceMa[maSize-1] = midPrice;
+
+	for(int i=0; i<maSize; i++)
+	{
+		sum += (midpriceMa[i]*(initialWeight + (increment*i)));
+	}
+	movingAverage = sum/maSize;
+	movingAverageDistance = midPrice-movingAverage;
+	/*cout<<"\n";
+	movingAverage -= midpriceMa[(min-15)%maSize];
+	movingAverage += midPrice/maSize;
+	midpriceMa[(min-15)%maSize] = midPrice/maSize;
+	movingAverageDistance = midPrice-movingAverage;*/
+}
+
+float getAverage(vector<float> vectNum)
+{
+	int n = vectNum.size();
+	float vectSum = 0;
+	for(int i=0 ; i<n ; i++)
+	vectSum += vectNum[i];
+
+	return vectSum/n;
+}
+
+// Function to calculate the standard deviation of the values in a vector
+float calculateStandardDeviation(vector<float>& data) {
+    if (data.size() < 2) {
+        throw std::runtime_error("Standard deviation requires at least two data points.");
+    }
+    
+    float mean = getAverage(data);
+    float variance = 0.0f;
+    
+    for(float value : data) {
+        variance += (value - mean) * (value - mean);
+    }
+    
+    variance /= (data.size() - 1); // Use N-1 for an unbiased estimator (sample standard deviation)
+    return std::sqrt(variance);
 }
 
 void printBook(vector<LevelItem> &bidBook, vector<LevelItem> &askBook, float bestBid, float bestAsk, int totalBids, int totalAsks)
