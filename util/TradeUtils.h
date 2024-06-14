@@ -201,13 +201,13 @@ void updateMA(int min, int maSize, vector<float> &midpriceMa, float midPrice, fl
 
 float getUpperBound(float predictedMa, float sd)
 {
-	float upperBound = predictedMa + (sd/0.707); // using SD of Sin wave here
+	float upperBound = predictedMa + (sd/0.6); // using SD of Sin wave here
 	return upperBound;
 }
 
 float getLLowerBound(float predictedMa, float sd)
 {
-	float lowerBound = predictedMa - (sd/0.707); // using SD of Sin wave here
+	float lowerBound = predictedMa - (sd/0.6); // using SD of Sin wave here
 	return lowerBound;
 }
 
