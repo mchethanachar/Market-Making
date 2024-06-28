@@ -16,8 +16,8 @@ void readTradeFile()
 	/* All variables */
 	fstream trades_file;
 	string tradeLine,timestr;
-	int i = 0;
 	char x;
+	int i = 0;
 	int h = -1;
 	int n = 0;
 	int min = 0;
@@ -28,6 +28,9 @@ void readTradeFile()
 	float predictedPrice = 0;
 	float sd = 0;
 	float open, high, low, close;
+	float upperBand, lowerBand;
+	int sellMo = 0;
+	int buyMo = 0;
 
 	// Create and open a text file
     ofstream priceFile("price_file.csv");
@@ -35,7 +38,7 @@ void readTradeFile()
 	ofstream predictedPriceFile("predictedPrice_file.csv");
 	ofstream candleStick("candleStick_file.csv");
 	vector<string> orderDetails;
-	trades_file.open("D:/HFT/Data/EQUITY_ORDER_V3_2023-10-04/infosys.txt",ios::in);
+	trades_file.open("D:/HFT/Data/EQUITY_ORDER_V3_2023-10-04/reliance.txt",ios::in);
 	if(trades_file.is_open())
 	{
 		cout<<"File is open\n";
@@ -69,8 +72,6 @@ void readTradeFile()
 				low = midPrice;
 				prevMin = getMin(orderItem.versionTime);
 				priceFile<<totalMin<<","<<midPrice<<"\n";
-				//printBook(bidBook, askBook, bestBid, bestAsk, totalBids, totalAsks);
-				//cout<<orderItem.versionTime<<"       Price - "<<midPrice<<"    Volume - "<<volume<<"\n";
 				updateMA(maWeight, maSize, midpriceMa, midPrice,movingAverage, movingAverageDistance);
 				//cout<<"Moving average - "<<movingAverage<<"\n";
 				if(totalMin >= 15+maSize-1)
@@ -83,7 +84,7 @@ void readTradeFile()
 					maCounter++;
 					if(maCounter>=maSlopeSize)
 					{
-						cout<<totalMin<<"\n";
+						//cout<<totalMin<<"\n";
 						for(int i=0 ; i<maSlopeSize ; i++)
 						{
 							cout<<movingAverages[i]<<" ";
@@ -91,19 +92,46 @@ void readTradeFile()
 						cout<<"\n";
 						sd = calculateStandardDeviation(movingAverageDistances);
 						predictedPrice = getNextMa(movingAverages, maSlopeSize) + getAverage(movingAverageDistances);
-						predictedPriceFile<<totalMin<<","<<getUpperBound(predictedPrice,sd)<<","<<getLLowerBound(predictedPrice, sd)<<"\n";
-
+						upperBand = getUpperBound(predictedPrice,sd);
+						lowerBand = getLowerBound(predictedPrice, sd);
+						predictedPriceFile<<totalMin<<","<<getUpperBound(predictedPrice,sd)<<","<<getLowerBound(predictedPrice, sd)<<"\n";
 						//cout<<orderItem.versionTime<<" - "<<getSlope(movingAverages, maSlopeSize)<<" Average distance - "<<getAverage(movingAverageDistances);
-						cout<<orderItem.versionTime<<"   Predicted price - "<<predictedPrice<<"  Upper bound - "<<getUpperBound(predictedPrice,sd)<<"  Lower Bound - "<<getLLowerBound(predictedPrice, sd)<<"\n";
+						//cout<<orderItem.versionTime<<"   Predicted price - "<<predictedPrice<<"  Upper bound - "<<getUpperBound(predictedPrice,sd)<<"  Lower Bound - "<<getLowerBound(predictedPrice, sd)<<"\n";
+						//detectPhase(mmPhase, prevPeak, upperBand, lowerBand, midPrice);
+						//cout<<mmPhase<<"\n";
 						//cout<<"      Std -  "<<calculateStandardDeviation(movingAverageDistances)<<"\n";
 					}
 				}
-				//cout<<"Available  Qty -  "<<avlQty<<"    Available Cash - "<<avlCash<<"\n";
+				cout<<orderItem.versionTime<<"       Price - "<<midPrice<<"    Volume - "<<volume<<"   Total min - "<<totalMin<<"    Phase - "<<mmPhase<<"\n";
+				cout<<"Available  Qty -  "<<avlQty<<"    Available Cash - "<<avlCash<<"\n";
+				cout<<"Sell MOs - "<<sellMo<<"   Buy MOs - "<<buyMo<<"\n";
+				sellMo = 0;
+				buyMo = 0;
+				printBook(bidBook, askBook, bestBid, bestAsk, totalBids, totalAsks);
 				//cout<<getPrediction()<<"\n";
 				//printPredictionPercentage();
 				if(hour==15 && min >= 30)
 				break;
 			}
+			/*if(totalMin >= 15+maSize-1)
+			{
+				if(maCounter>=maSlopeSize)
+				{
+					if(orderItem.type == "G")
+					{
+						if(orderItem.side == "B")
+						{
+							buyMo += orderItem.quantity;
+						}
+						else
+						{
+							sellMo += orderItem.quantity;
+						}
+					}
+					detectPhase(mmPhase, prevPeak, upperBand, lowerBand, midPrice);
+					meanReversionMM();
+				}
+			}*/
 		}
 		cout<<"Closing files\n";
 		//printBook(bidBook, askBook, bestBid, bestAsk, totalBids, totalAsks);
@@ -117,4 +145,3 @@ void readTradeFile()
 	cout<<"File reading complete";
 }
 
- 

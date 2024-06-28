@@ -191,7 +191,7 @@ float getUpperBound(float predictedMa, float sd)
 	return upperBound;
 }
 
-float getLLowerBound(float predictedMa, float sd)
+float getLowerBound(float predictedMa, float sd)
 {
 	float lowerBound = predictedMa - (sd/0.6); // using SD of Sin wave here
 	return lowerBound;
@@ -305,6 +305,32 @@ float calculateStandardDeviation(vector<float>& data) {
     
     variance /= (data.size() - 1); // Use N-1 for an unbiased estimator (sample standard deviation)
     return std::sqrt(variance);
+}
+
+void detectPhase(bool &mmPhase, bool &prevPeak,float upperBand, float lowerBand, float midPrice)
+{
+	if(midPrice>upperBand)
+	{
+		prevPeak = true;
+		mmPhase = true;
+		return;
+	}
+
+	if(midPrice<lowerBand)
+	{
+		prevPeak = false;
+		mmPhase = false;
+		return;
+	}
+
+	if(prevPeak == true)
+	{
+		mmPhase = false;
+	}
+	else
+	{
+		mmPhase = true;
+	}
 }
 
 void printBook(vector<LevelItem> &bidBook, vector<LevelItem> &askBook, float bestBid, float bestAsk, int totalBids, int totalAsks)

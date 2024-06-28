@@ -61,6 +61,9 @@ vector<float> movingAverageDistances(maSlopeSize, 0);
 int maCounter = 0;
 float maWeight = 1.99;
 
+bool mmPhase = false;
+bool prevPeak = true;
+
 void processOrder(OrderItem orderItem)
 {	
 	if (preOpen == true && orderItem.session =="3")

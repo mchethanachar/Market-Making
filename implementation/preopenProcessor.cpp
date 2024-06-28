@@ -8,7 +8,7 @@ void updateSmallestHighest(vector<LevelItem> bidBook, vector<LevelItem> askBook,
 float smallestPrice, highestPrice, openingPrice;
 int levels, openingQty, openingImbalance;
 
-float prevClose = 1433.60;
+float prevClose = 1427.95;
 float openingDiff = 0;
 
 void callAuction(vector<LevelItem> bidBook, vector<LevelItem> askBook, int poBuys, int poAsks, int bestBid, int bestAsk, float &openPrice, int &openQty)
