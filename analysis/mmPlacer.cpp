@@ -6,7 +6,9 @@ using namespace std;
 float mmCurrAsk = -1;
 float mmCurrBid = -1;
 int bidQty = 0;
-int maxQty = 245;
+int maxQty = 32;
+
+void recaliberateOrders(float flowSlope, float priceSlope);
 
 void updateMmOrders()
 {
@@ -34,4 +36,55 @@ void updateMmOrders()
 	
 	mmCurrAsk = newAsk;
 	mmCurrBid = newBid;
+}
+
+
+void updateMmOrders2(float flowSlope, float priceSlope)
+{
+	float newBid, newAsk;
+	updateBidAskLevels();
+	recaliberateOrders(flowSlope, priceSlope);
+	newBid = getBidPrice(bestBid, mmBid);
+	newAsk = getAskPrice(bestAsk, mmAsk);
+	if (avlQty != bidQty || mmCurrAsk != newAsk)
+	{
+		if(avlQty > 0)
+		{
+			OrderItem askOrder = createOrder("S", newAsk, avlQty, "2");
+			processOrder(askOrder);
+		}
+		bidQty = avlQty;
+	}
+	if (avlQty<maxQty || mmCurrBid != newBid)
+	{
+		if(avlQty !=maxQty)
+		{
+			OrderItem bidOrder = createOrder("B", newBid, maxQty-avlQty, "1");
+			processOrder(bidOrder);
+		}
+	}
+	
+	mmCurrAsk = newAsk;
+	mmCurrBid = newBid;
+}
+
+void recaliberateOrders(float flowSlope, float priceSlope)
+{
+	if(priceSlope>0.01)
+	{
+		if((bestAsk-bestBid)>0.05)
+		mmBid--;
+	}
+	if(priceSlope<0.01 && flowSlope>0.01)
+	{
+		mmBid++;
+		if((bestAsk-bestBid)>0.05)
+		mmAsk--;
+	}
+	if(priceSlope<0.01 && flowSlope<0.01)
+	{
+		mmBid+=2;
+		if((bestAsk-bestBid)>0.05)
+		mmAsk--;
+	}
 }

@@ -48,21 +48,16 @@ string canOrder = "";
 float avlCash = 100000;
 int avlQty = 0;
 
-//For moving average calculation
-int maSize = 20;
-vector<float> midpriceMa(maSize,0);
-float movingAverage = 0;
-float movingAverageDistance = 0;
+//Order flow analysis
+int flowSize = 20;
+vector<float> midPrices(flowSize);
+vector<float> moImbalance(flowSize);
 
-//For moving average slope calculation
-int maSlopeSize = 10;
-vector<float> movingAverages(maSlopeSize, 0);
-vector<float> movingAverageDistances(maSlopeSize, 0);
-int maCounter = 0;
-float maWeight = 1.99;
+//Moving average
+
 
 void processOrder(OrderItem orderItem)
-{	
+{
 	if (preOpen == true && orderItem.session =="3")
 	{
 		callAuction(bidBook, askBook, poBuys, poSells, bestBid, bestAsk, openPrice, openQty);
@@ -311,7 +306,7 @@ void matchBuyOrder(OrderItem &orderItem)
 }
 
 void matchSellOrder(OrderItem &orderItem)
-{	
+{
 	int remainingQty = orderItem.quantity;
 	for (int i=0 ; i<=bidBook.size() ; i++)
 	{
@@ -393,6 +388,7 @@ void matchAskLimitOrder(OrderItem &orderItem)
 					avlCash -= remainingQty * getBidPrice(bestBid, i);
 				}
 				bidBook[i].bookItems[j].quantity -= remainingQty;
+				volume += remainingQty;
 				totalBids -= remainingQty;
 				totalAvlQty -= remainingQty;
 				bidBook[i].cumQty -= remainingQty;

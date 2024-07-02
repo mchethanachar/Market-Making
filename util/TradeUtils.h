@@ -226,16 +226,17 @@ float getNextMa(vector<float> &movingAverages, int maSlopeSize)
 	return nextValue;
 }
 
-float getSlope(vector<float> &movingAverages, int maSlopeSize)
+float getSlope(vector<float> &movingAverages)
 {
-	vector<float> timeVector(maSlopeSize,0);
+	int slopeSize = movingAverages.size();
+	vector<float> timeVector(slopeSize,0);
 
-	for(int i=0 ; i<maSlopeSize ; i++)
+	for(int i=0 ; i<slopeSize ; i++)
 	timeVector[i] = i;
 
 	// Calculate the necessary summations
     float sumX = 0.0, sumY = 0.0, sumXY = 0.0, sumX2 = 0.0;
-    for (int i = 0; i < maSlopeSize; ++i) {
+    for (int i = 0; i < slopeSize; ++i) {
         sumX += timeVector[i];
         sumY += movingAverages[i];
         sumXY += timeVector[i] * movingAverages[i];
@@ -243,8 +244,8 @@ float getSlope(vector<float> &movingAverages, int maSlopeSize)
     }
 
 	// Calculate the slope (m)
-    float numerator = maSlopeSize * sumXY - sumX * sumY;
-    float denominator = maSlopeSize * sumX2 - sumX * sumX;
+    float numerator = slopeSize * sumXY - sumX * sumY;
+    float denominator = slopeSize * sumX2 - sumX * sumX;
 
 	float slope = numerator / denominator;
     return slope;
@@ -305,6 +306,21 @@ float calculateStandardDeviation(vector<float>& data) {
     
     variance /= (data.size() - 1); // Use N-1 for an unbiased estimator (sample standard deviation)
     return std::sqrt(variance);
+}
+
+int getBookWieght(vector<LevelItem> &bidBook, vector<LevelItem> &askBook, int depth)
+{
+	int bidSum = 0;
+	int askSum = 0;
+	for(int i=0 ; i<depth ; i++)
+	{
+		if(bidBook[i].cumQty>0)
+		bidSum+=bidBook[i].cumQty;
+
+		if(askBook[i].cumQty>0)
+		askSum+=askBook[i].cumQty;
+	}
+	return bidSum-askSum;
 }
 
 void printBook(vector<LevelItem> &bidBook, vector<LevelItem> &askBook, float bestBid, float bestAsk, int totalBids, int totalAsks)
