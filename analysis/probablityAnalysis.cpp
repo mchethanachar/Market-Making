@@ -13,6 +13,7 @@ int minDiff;
 vector<int> cumBid(5);
 vector<int> cumAsk(5);
 
+//This finds bid and ask levels where Cumulative bid and ask forces are closest
 void updateBidAskLevels()
 {
 	int i,j;
