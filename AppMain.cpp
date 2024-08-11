@@ -7,7 +7,6 @@ void readTradeFile();
 
 int main()
 {
-	//cout<<getBidPrice(100,5);
 	readTradeFile();
 }
 
@@ -44,9 +43,14 @@ void readTradeFile()
 			i++;
 			OrderItem orderItem= getOrderItem(tradeLine);
 			//orderItem.details();
+
+			//Orders are matched here or they are put to book.
 			processOrder(orderItem);
-			//if(preOpen == false)
-			//updateMmOrders();
+
+			// Market making comes to picture only after 
+			if(preOpen == false)
+			updateMmOrders();
+
 			min = getMin(orderItem.versionTime);
 			hour = getHour(orderItem.versionTime);
 			totalMin = getTotalMin(hour, min);
@@ -58,6 +62,7 @@ void readTradeFile()
 			if(midPrice<low)
 			low = midPrice;
 
+			//Printing once in a min
 			if(min != prevMin && preOpen == false && totalMin >= 15)
 			{
 				close = midPrice;
@@ -99,8 +104,6 @@ void readTradeFile()
 					}
 				}
 				//cout<<"Available  Qty -  "<<avlQty<<"    Available Cash - "<<avlCash<<"\n";
-				//cout<<getPrediction()<<"\n";
-				//printPredictionPercentage();
 				if(hour==15 && min >= 30)
 				break;
 			}

@@ -14,7 +14,7 @@ void matchSellOrder(OrderItem &orderItem);
 void matchBuyOrder(OrderItem &orderItem);
 void poMatch();
 
-//Limit order books
+//Limit order books - Each level is of difference 1 tick. This can be comapred to a map with best bid and ask as the fiirst members
 vector<LevelItem> bidBook(20000);
 vector<LevelItem> askBook(20000);
 
@@ -61,6 +61,8 @@ vector<float> movingAverageDistances(maSlopeSize, 0);
 int maCounter = 0;
 float maWeight = 1.99;
 
+
+// All preopen orders used in call auction process to determine the opening price
 void processOrder(OrderItem orderItem)
 {	
 	if (preOpen == true && orderItem.session =="3")
@@ -96,7 +98,6 @@ void processNewOrder(OrderItem &orderItem)
 		}
 	}
 	if (orderItem.side == "B" && orderItem.type == "L"){
-		//Buy Limit
 		processBidLimit(orderItem);
 	}
 	else if (orderItem.side == "B" && orderItem.type == "G") {
@@ -110,11 +111,9 @@ void processNewOrder(OrderItem &orderItem)
 		}
 	}
 	else if (orderItem.side == "S" && orderItem.type == "L") {
-		//Sell Limit
 		processAskLimit(orderItem);
 	}
 	else if (orderItem.side == "S" && orderItem.type == "G") {
-		//Sell Market
 		if(preOpen == false)
 		{
 			matchSellOrder(orderItem);
@@ -157,7 +156,6 @@ void processBidLimit(OrderItem &orderItem)
 				bidBook[levels].bookItems.push_back(bookItem);
 				bidBook[levels].cumQty += orderItem.quantity;
 			}
-			//cout<<"Inserted into the book\n";
 		}
 		totalBids += orderItem.quantity;
 	}
@@ -168,7 +166,6 @@ void processAskLimit(OrderItem &orderItem)
 	if (orderItem.price <= bestBid && preOpen == false)
 	{
 		//match order and update quantity
-		//cout<<"Matching limit Ask order\n";
 		matchAskLimitOrder(orderItem);
 	}
 	if (orderItem.quantity > 0)
@@ -183,7 +180,6 @@ void processAskLimit(OrderItem &orderItem)
 		else
 		{
 			int levels = getLevel(bestAsk, orderItem.price);
-			//cout<<"Inserting into level "<<levels<<" And size of the book is "<<askBook.size()<<"\n";
 			if (bestAsk > orderItem.price)
 			{  
 				addMultipleLevels(askBook, levels);
@@ -448,7 +444,6 @@ void processDelete(OrderItem orderItem)
 		{
 			if (orderItem.orderId == askBook[i].bookItems[j].orderId)
 			{
-				//cout<<"Deleting  order\n";
 				askBook[i].cumQty -= askBook[i].bookItems[j].quantity;
 				totalAsks -= askBook[i].bookItems[j].quantity;
 				deleteOrder(askBook[i].bookItems, j);

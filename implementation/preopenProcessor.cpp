@@ -8,9 +8,11 @@ void updateSmallestHighest(vector<LevelItem> bidBook, vector<LevelItem> askBook,
 float smallestPrice, highestPrice, openingPrice;
 int levels, openingQty, openingImbalance;
 
+//This is needed if muliple prices have same matching number
 float prevClose = 1433.60;
 float openingDiff = 0;
 
+// We determine the price where we match the highest quantity. That will be opening price
 void callAuction(vector<LevelItem> bidBook, vector<LevelItem> askBook, int poBuys, int poAsks, int bestBid, int bestAsk, float &openPrice, int &openQty)
 {
 	updateSmallestHighest(bidBook, askBook, bestBid, bestAsk);
@@ -115,7 +117,6 @@ void updateSmallestHighest(vector<LevelItem> bidBook, vector<LevelItem> askBook,
 			smallestPrice = price;
 		}
 	}
-	//parse ask book
 	for(int i=0 ; i<20000 ; i++)
 	{
 		if(askBook[i].cumQty>0)
