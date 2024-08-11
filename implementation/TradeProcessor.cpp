@@ -48,13 +48,10 @@ string canOrder = "";
 float avlCash = 100000;
 int avlQty = 0;
 
-//Order flow analysis
-int flowSize = 20;
-vector<float> midPrices(flowSize);
-vector<float> moImbalance(flowSize);
-
 //Moving average
-
+int maSize = 50;
+vector<float> prices(maSize, 0);
+float priceSum = 0;
 
 void processOrder(OrderItem orderItem)
 {

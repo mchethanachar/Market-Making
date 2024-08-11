@@ -281,6 +281,14 @@ void updateMA(float weight, int maSize, vector<float> &midpriceMa, float midPric
 	movingAverageDistance = midPrice-movingAverage;*/
 }
 
+float getMA(float &sum, float newPrice, vector<float> &prices, int index)
+{
+	sum -= prices[index%prices.size()];
+	sum += newPrice;
+	prices[index%prices.size()] = newPrice;
+	return sum/prices.size();
+}
+
 float getAverage(vector<float> vectNum)
 {
 	int n = vectNum.size();

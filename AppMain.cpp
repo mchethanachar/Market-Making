@@ -31,31 +31,31 @@ void readTradeFile()
 	int totalSellMo = 0;
 	float totalBookWeight = 0;
 	float originalPrice = 0;
-	float flowSlope = 0;
-	float priceSlope = 0;
+	float ma=0;
+	bool maFlag = true;
 
 	// Create and open a text file
     ofstream priceFile("price_file.csv");
 	ofstream candleStick("candleStick_file.csv");
 	ofstream priceImpact("priceImpact.csv");
+	ofstream movingAverage("movingAverage.csv");
 
-	trades_file.open("D:/HFT/Data/EQUITY_ORDER_V3_2023-10-04/wipro.txt",ios::in);
+	trades_file.open("D:/HFT/Data/EQUITY_ORDER_V3_2023-10-04/tcs.txt",ios::in);
 	if(trades_file.is_open())
 	{
 		cout<<"File is open\n";
 		while(getline(trades_file, tradeLine))
 		{
-			i++;
 			OrderItem orderItem= getOrderItem(tradeLine);
 			processOrder(orderItem);
-			if(preOpen == false)
-			updateMmOrders();
 			//updateMmOrders2(flowSlope, priceSlope);
 			//updateMmOrders();
 			min = getMin(orderItem.versionTime);
 			hour = getHour(orderItem.versionTime);
 			totalMin = getTotalMin(hour, min);
 			midPrice = getMidPrice(bestAsk, bestBid);
+			if(preOpen == false)
+			updateMmOrders3(maFlag);
 
 			if(midPrice>high)
 			high = midPrice;
@@ -80,6 +80,15 @@ void readTradeFile()
 
 			if(min != prevMin && preOpen == false && totalMin >= 15)
 			{
+				ma = getMA(priceSum, midPrice, prices, i);
+				if(i>=50)
+				{
+					movingAverage<<totalMin<<","<<ma<<"\n";
+					if(midPrice>ma)
+					maFlag = true;
+					else
+					maFlag = false;
+				}
 				close = midPrice;
 				if(totalMin>15)
 				{
@@ -87,28 +96,6 @@ void readTradeFile()
 				}
 				priceImpact<<totalMin<<","<<totalBuyMo-totalSellMo<<","<<midPrice<<","<<totalBookWeight/1000<<"\n";
 				//printBook(bidBook, askBook, bestBid, bestAsk, totalBids, totalAsks);
-				leftShift(midPrices);
-				midPrices[flowSize-1] = midPrice;
-				leftShift(moImbalance);
-				moImbalance[flowSize-1] = totalBuyMo-totalSellMo;
-				if(totalMin-14 >= flowSize)
-				{
-					priceSlope = getSlope(midPrices);
-					flowSlope = getSlope(moImbalance);
-					/*cout<<"Price list\n";
-					for(int i=0; i<flowSize; i++)
-					{
-						cout<<midPrices[i]<<"  ";
-					}
-					cout<<"\nPrice slope - "<<getSlope(midPrices)<<"\n";
-					cout<<"Imbalance list\n";
-					for(int i=0; i<flowSize; i++)
-					{
-						cout<<moImbalance[i]<<"  ";
-					}
-					cout<<"\nOrder Imbalance slope - "<<getSlope(moImbalance)<<"\n";
-					*/
-				}
 
 				open = midPrice;
 				close = midPrice;
@@ -118,15 +105,14 @@ void readTradeFile()
 				priceFile<<totalMin<<","<<midPrice<<"\n";
 				//cout<<orderItem.versionTime<<" - "<<totalMin<<" - "<<midPrice<<"\n";
 				cout<<orderItem.versionTime<<"    "<<"Available cash - "<<avlCash<<"  Available position - "<<avlQty<<"\n";
-				cout<<"Limit Buy - "<<limitBidMatch<<"  Limit Ask - "<<limitAskMatch<<"  Market Buy - "<<marketBidMatch<<"  Market Ask - "<<marketAskMatch<<"\n";
 				cout<<"Buy MO - "<<buyMo<<"  Sell MO - "<<sellMo<<"\n";
-				cout<<"MO slope  - "<<flowSlope<<"   Price slope - "<<priceSlope<<"\n";
 				printBook(bidBook, askBook, bestBid, bestAsk, totalBids, totalAsks);
 				buyMo = 0;
 				sellMo = 0;
 				cout<<"*****************************\n";
 				if(hour==15 && min >= 30)
 				break;
+				i++;
 			}
 		}
 		cout<<"Total Buy - "<<totalBuyMo<<"   Total Sell - "<<totalSellMo<<"\n";
@@ -136,6 +122,7 @@ void readTradeFile()
 		priceFile.close();
 		candleStick.close();
 		priceImpact.close();
+		movingAverage.close();
 		cin>>x;
 	}
 	cout<<"File reading complete";
